@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bullshit-Bingo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#2344d6;--ink:#101a4d;--paper:#fffdf7;--line:#d9d4c4;--pink:#ff3d81;--sun:#ffd23f;--mint:#17b890;
+--f:"Bricolage Grotesque","Arial Rounded MT Bold",system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:var(--f);color:var(--ink);background:var(--blue);
+background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.14) 1.5px,transparent 0);background-size:22px 22px;
+padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+#app{max-width:520px;margin:0 auto;padding:16px 14px 40px}
+.logo{font-weight:800;font-size:34px;line-height:1;color:#fff;margin:8px 0 4px;letter-spacing:-.02em}
+.logo b{background:var(--sun);color:var(--ink);padding:0 8px;border-radius:8px;display:inline-block;transform:rotate(-3deg)}
+.sub{color:#dfe5ff;margin:0 0 18px}
+.ticket{background:var(--paper);border-radius:18px;padding:16px;position:relative;margin-bottom:14px;box-shadow:0 6px 0 rgba(10,20,80,.35)}
+.ticket.perf::before,.ticket.perf::after{content:"";position:absolute;top:50%;width:22px;height:22px;border-radius:50%;background:var(--blue);margin-top:-11px}
+.ticket.perf::before{left:-11px}.ticket.perf::after{right:-11px}
+h2{font-size:19px;margin:0 0 10px}
+label{font-weight:700;font-size:14px;display:block;margin:0 0 4px}
+input{width:100%;font:inherit;font-size:17px;padding:12px 14px;border:2px solid var(--ink);border-radius:12px;background:#fff;color:var(--ink);outline:none}
+input:focus-visible,button:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+button{font:inherit;font-weight:700;border:2px solid var(--ink);background:#fff;color:var(--ink);padding:11px 16px;border-radius:12px;cursor:pointer;box-shadow:0 3px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+button:active{transform:translateY(3px);box-shadow:none}
+button.p{background:var(--pink);color:#fff}
+button.s{background:var(--sun)}
+button.on{background:var(--ink);color:#fff}
+.row{display:flex;gap:8px;align-items:center}.w{flex:1}.sp{justify-content:space-between}.mt{margin-top:12px}
+.muted{color:#6b6a63;font-size:14px}
+.top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.chip{background:#fff;border:2px solid var(--ink);border-radius:999px;padding:6px 12px;font-weight:700;display:flex;gap:6px;align-items:center;cursor:pointer}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--mint)}.dot.bad{background:var(--pink)}
+.tabs{display:flex;background:rgba(10,20,80,.35);border-radius:14px;padding:4px;margin-bottom:12px}
+.tabs button{flex:1;border:0;box-shadow:none;background:transparent;color:#fff;padding:9px}
+.tabs button.on{background:var(--paper);color:var(--ink)}
+.grid{display:grid;gap:0;border:2px solid var(--ink);border-radius:12px;overflow:hidden;background:#fff}
+.cell{aspect-ratio:1;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center;padding:5px;font-weight:600;font-size:clamp(10px,3.1vw,15px);line-height:1.15;word-break:break-word;hyphens:auto;position:relative;cursor:pointer;user-select:none}
+.cell.e{color:#b3ae9b;font-size:26px;font-weight:500;background:repeating-linear-gradient(45deg,#fffdf7,#fffdf7 6px,#f6f2e3 6px,#f6f2e3 12px)}
+.cell span{position:relative;z-index:1}
+.cell.m::before{content:"";position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff7aa8,var(--pink) 60%);opacity:.85;animation:dab .28s cubic-bezier(.3,1.6,.5,1)}
+.cell.m{color:#4a0a22}
+.cell.win{background:var(--sun)}
+@keyframes dab{from{transform:scale(.2);opacity:0}}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.item:last-child{border:0}.item .t{flex:1;font-weight:600}.item small{display:block;font-weight:500;color:#6b6a63}
+.item button{padding:4px 10px;box-shadow:none}
+.tag{font-size:12px;background:var(--mint);color:#fff;border-radius:999px;padding:2px 8px}
+.sheet{position:fixed;inset:0;background:rgba(10,20,80,.6);display:flex;align-items:flex-end;z-index:5}
+.sheet>div{background:var(--paper);width:100%;max-width:520px;margin:0 auto;max-height:72%;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0))}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0) + 12px);transform:translateX(-50%);background:var(--sun);color:var(--ink);border:2px solid var(--ink);box-shadow:0 4px 0 var(--ink);font-weight:800;padding:10px 18px;border-radius:14px;z-index:30;animation:drop .35s cubic-bezier(.3,1.5,.5,1);max-width:92%;text-align:center}
+@keyframes drop{from{transform:translate(-50%,-40px);opacity:0}}
+.big{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;pointer-events:none;font-weight:800;font-size:24vw;color:var(--sun);-webkit-text-stroke:3px var(--ink);text-shadow:0 8px 0 var(--pink);animation:pop 2.4s ease forwards}
+@keyframes pop{0%{transform:scale(.1) rotate(-14deg);opacity:0}20%{transform:scale(1.15) rotate(5deg);opacity:1}35%{transform:scale(1) rotate(-3deg)}80%{opacity:1}100%{opacity:0;transform:scale(1.05)}}
+.cf{position:fixed;top:-20px;width:10px;height:15px;z-index:19;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(112vh) rotate(800deg)}}
+@media (prefers-reduced-motion:reduce){.cell.m::before,.toast,.big,.cf{animation:none}.cf{display:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $app=document.getElementById('app');
+const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const rid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const me={id:LS.get('bb-id')||rid(),name:LS.get('bb-name')||''};LS.set('bb-id',me.id);
+let role=null,code='',peer=null,conn=null,conns=new Set(),items=[],n=1,status='',tab='card',mode='build',picking=null,card=null,err='';
+
+/* ---------- Netzwerk (PeerJS, direkt von Gerät zu Gerät) ---------- */
+function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),4200)}
+function confetti(){const c=['#ff3d81','#ffd23f','#17b890','#fff','#101a4d'];for(let i=0;i<70;i++){const e=document.createElement('div');e.className='cf';e.style.left=Math.random()*100+'vw';e.style.background=c[i%5];e.style.animationDuration=1.6+Math.random()*2.2+'s';e.style.animationDelay=Math.random()*.5+'s';document.body.append(e);setTimeout(()=>e.remove(),5000)}}
+function celebrate(){const e=document.createElement('div');e.className='big';e.textContent='BINGO!';document.body.append(e);confetti();setTimeout(()=>e.remove(),2500);if(navigator.vibrate)navigator.vibrate([80,40,80])}
+const hp=new URLSearchParams((location.hash||'').slice(1));
+const okDb=u=>/^https:\/\/[^\s\/]+\.(firebasedatabase\.app|firebaseio\.com)$/.test(u);
+const cfg={db:''};
+{const fromLink=(hp.get('db')||'').replace(/\/+$/,'');if(okDb(fromLink))LS.set('bb-db',fromLink);cfg.db=LS.get('bb-db')||''}
+let es=null,tree={},loaded=false,hb=null,opened=false;
+const url=p=>cfg.db+'/lobbies/'+code+(p?'/'+p:'')+'.json';
+function setAt(path,data){const k=path.split('/').filter(Boolean);if(!k.length){tree=data||{};return}let o=tree;for(let i=0;i<k.length-1;i++){if(typeof o[k[i]]!=='object'||o[k[i]]===null)o[k[i]]={};o=o[k[i]]}const l=k[k.length-1];if(data===null)delete o[l];else o[l]=data}
+function sync(){items=Object.entries(tree.items||{}).map(([id,v])=>({id,...v})).sort((a,b)=>(a.ts||0)-(b.ts||0));const now=Date.now();n=Math.max(1,Object.values(tree.players||{}).filter(p=>now-(p.ts||0)<90000).length);render()}
+async function api(method,p,body){try{const r=await fetch(url(p),{method,body:body?JSON.stringify(body):undefined});if(!r.ok)throw 0;return await r.json()}catch(e){toast('Senden fehlgeschlagen. Prüfe Verbindung und Datenbank-Regeln.');return null}}
+function send(m){const base={by:me.id,who:me.name,ts:Date.now()};
+ if(m.t==='add')api('POST','items',{...base,text:String(m.text).slice(0,80)});
+ else if(m.t==='del')api('DELETE','items/'+m.id);
+ else if(m.t==='bingo')api('POST','bingos',base)}
+function connect(){if(es)es.close();status='wait';opened=false;loaded=false;tree={};
+ es=new EventSource(url());
+ es.onopen=()=>{opened=true;status='ok';err='';render()};
+ es.addEventListener('put',e=>{const m=JSON.parse(e.data),first=!loaded;
+  if(m.path==='/'){tree=m.data||{};loaded=true}else setAt(m.path,m.data);
+  if(!first&&m.path.startsWith('/bingos/')&&m.data&&m.data.by!==me.id){toast('🎉 '+m.data.who+' hat Bingo!');confetti()}
+  status='ok';err='';sync()});
+ es.addEventListener('patch',e=>{const m=JSON.parse(e.data);for(const k in m.data)setAt(m.path.replace(/\/$/,'')+'/'+k,m.data[k]);sync()});
+ es.addEventListener('cancel',()=>{status='bad';err='Zugriff verweigert. Prüfe die Regeln der Datenbank.';render()});
+ es.onerror=()=>{status='bad';err=opened?'Verbindung wird neu aufgebaut …':'Keine Verbindung. Stimmt die Datenbank-Adresse und sind die Regeln gesetzt?';render()}}
+function beat(){api('PUT','players/'+me.id,{who:me.name,ts:Date.now()})}
+function startLobby(c){leave(true);role='on';code=c;card=loadCard();LS.set('bb-last',c);tab='card';connect();beat();hb=setInterval(beat,30000);render()}
+function leave(quiet){if(es)es.close();es=null;clearInterval(hb);role=null;code='';items=[];n=1;status='';if(!quiet){err='';render()}}
+
+/* ---------- Karte ---------- */
+const ck=()=>'bb-card-'+code;
+function loadCard(){try{return JSON.parse(LS.get(ck()))||newCard(3)}catch(e){return newCard(3)}}
+function newCard(s){return{size:s,cells:Array(s*s).fill(null),marked:Array(s*s).fill(false),lines:0}}
+function saveCard(){LS.set(ck(),JSON.stringify(card));render()}
+function lines(c){const s=c.size,r=[...Array(s).keys()],out=[];const ok=a=>a.every(i=>c.cells[i]&&c.marked[i]);
+ r.forEach(i=>{const row=r.map(k=>i*s+k),col=r.map(k=>k*s+i);if(ok(row))out.push(row);if(ok(col))out.push(col)});
+ const d1=r.map(k=>k*s+k),d2=r.map(k=>k*s+s-1-k);if(ok(d1))out.push(d1);if(ok(d2))out.push(d2);return out}
+function toggle(i){if(!card.cells[i])return;card.marked[i]=!card.marked[i];const L=lines(card).length,up=L>card.lines;card.lines=L;saveCard();if(up){celebrate();send({t:'bingo'})}}
+function fill(){const used=new Set(card.cells.filter(Boolean).map(x=>x.i));const pool=items.filter(i=>!used.has(i.id)).sort(()=>Math.random()-.5);card.cells=card.cells.map(x=>x||(pool.length?(p=>({i:p.id,t:p.text}))(pool.pop()):null));saveCard()}
+
+/* ---------- Oberfläche ---------- */
+const sheetOf=()=>{const used=new Set(card.cells.filter(Boolean).map(x=>x.i));const free=items.filter(i=>!used.has(i.id));
+ return`<div class="sheet" data-a="closeSheet"><div><div class="row sp"><h2>Vorschlag wählen</h2><button data-a="closeSheet">Schließen</button></div>${free.length?free.map(i=>`<div class="item" data-a="pick" data-i="${esc(i.id)}" style="cursor:pointer"><span class="t">${esc(i.text)}</span></div>`).join(''):'<p class="muted">Alle Vorschläge liegen schon auf deiner Karte. Trag in der Masterliste neue ein.</p>'}</div></div>`};
+function view(){
+ let h='<div class="logo">Bullshit-<b>Bingo</b></div>';
+ if(!role){
+  h+='<p class="sub">Gemeinsam Buzzwords sammeln, jeder mit eigener Karte.</p>';
+  if(err)h+=`<div class="ticket"><b>${esc(err)}</b></div>`;
+  if(!cfg.db)return h+`<div class="ticket"><h2>Einmalig: Datenbank verbinden</h2><p class="muted">Füge die Adresse deiner Firebase Realtime Database ein. Sie endet auf firebasedatabase.app oder firebaseio.com. Freunde brauchen das nicht, wenn sie über deinen Einladungslink kommen.</p><input id="db" placeholder="https://…firebasedatabase.app" autocapitalize="none" autocorrect="off" spellcheck="false"><button class="p mt" data-a="savedb" style="width:100%">Speichern</button></div>`;
+  const last=LS.get('bb-last'),pre=hp.get('c')||'';
+  h+=`<div class="ticket"><label for="nm">Dein Name</label><input id="nm" maxlength="20" value="${esc(me.name)}" placeholder="z. B. Lena"></div>
+  <div class="ticket perf"><h2>Neue Lobby eröffnen</h2><p class="muted">Die Lobby liegt in der Datenbank. Niemand muss online bleiben, damit sie bestehen bleibt.</p><button class="p" data-a="create" style="width:100%">Lobby eröffnen</button>${last?`<button class="mt" data-a="reopen" data-c="${esc(last)}" style="width:100%">Lobby ${esc(last)} wieder öffnen</button>`:''}</div>
+  <div class="ticket"><h2>Lobby beitreten</h2><label for="cd">Code</label><div class="row"><input id="cd" maxlength="12" autocapitalize="none" value="${esc(pre)}" placeholder="z. B. k3x9"><button class="s" data-a="join">Beitreten</button></div></div>
+  <p style="text-align:center"><button data-a="resetdb" style="background:transparent;color:#dfe5ff;border-color:#dfe5ff;box-shadow:none">Datenbank ändern</button></p>`;
+  return h}
+ h+=`<div class="top"><div class="chip" data-a="copy" title="Einladungslink kopieren"><span class="dot ${status==='ok'?'':'bad'}"></span>${esc(code)}</div><span class="muted" style="color:#dfe5ff">${n} im Raum</span><button class="s" data-a="copy" style="margin-left:auto">Link teilen</button><button data-a="leave">Raus</button></div>`;
+ if(err&&status!=='ok')h+=`<div class="ticket"><b>${esc(err)}</b></div>`;
+ h+=`<div class="tabs"><button class="${tab==='card'?'on':''}" data-a="tab" data-t="card">Meine Karte</button><button class="${tab==='list'?'on':''}" data-a="tab" data-t="list">Masterliste (${items.length})</button></div>`;
+ if(tab==='list'){
+  h+=`<div class="ticket"><div class="row"><input id="ai" maxlength="80" placeholder="Neuer Vorschlag, z. B. „Synergie“"><button class="p" data-a="add">Hinzufügen</button></div></div><div class="ticket">`;
+  h+=items.length?items.map(i=>`<div class="item"><span class="t">${esc(i.text)}<small>${esc(i.who||'Jemand')}</small></span>${card.cells.some(x=>x&&x.i===i.id)?'<span class="tag">auf Karte</span>':''}${i.by===me.id?`<button data-a="del" data-i="${esc(i.id)}" aria-label="Löschen">✕</button>`:''}</div>`).join(''):'<p class="muted">Noch nichts da. Trag den ersten Vorschlag ein.</p>';
+  return h+'</div>'}
+ const win=new Set(lines(card).flat());
+ h+=`<div class="ticket"><div class="row sp mt" style="margin:0 0 12px"><div class="row">${mode==='build'?[3,4,5].map(s=>`<button class="${s===card.size?'on':''}" data-a="size" data-s="${s}">${s}×${s}</button>`).join(''):`<b>${lines(card).length} Reihe${lines(card).length===1?'':'n'} voll</b>`}</div><button class="p" data-a="mode">${mode==='build'?'Spielen':'Bearbeiten'}</button></div>`;
+ h+=`<div class="grid" style="grid-template-columns:repeat(${card.size},1fr)">${card.cells.map((x,i)=>`<div class="cell${x?'':' e'}${x&&card.marked[i]?' m':''}${win.has(i)?' win':''}" data-a="cell" data-i="${i}"><span>${x?esc(x.t):(mode==='build'?'+':'')}</span></div>`).join('')}</div>`;
+ h+=mode==='build'?`<p class="muted">Tippe auf ein leeres Feld, um einen Vorschlag zu wählen. Ein belegtes Feld leerst du per Tippen.</p><div class="row"><button data-a="fill">Zufällig füllen</button><button data-a="clear">Leeren</button></div>`:`<p class="muted">Tippe ein Feld an, sobald es passiert. Eine volle Reihe, Spalte oder Diagonale ist ein Bingo.</p>`;
+ h+='</div>';if(picking!==null)h+=sheetOf();return h}
+function render(){const a=document.activeElement,keep=a&&a.id&&a.tagName==='INPUT'?{id:a.id,v:a.value,s:a.selectionStart}:null;
+ $app.innerHTML=view();if(keep){const e=document.getElementById(keep.id);if(e){if(keep.id!=='nm'||true)e.value=keep.v;e.focus();try{e.setSelectionRange(keep.s,keep.s)}catch(x){}}}}
+function newCode(){return Math.random().toString(36).slice(2,6)}
+function setName(){const e=document.getElementById('nm');if(e){me.name=e.value.trim().slice(0,20);LS.set('bb-name',me.name)}if(!me.name){toast('Bitte zuerst einen Namen eingeben');return false}return true}
+function addItem(){const e=document.getElementById('ai'),t=e.value.trim();if(!t)return;if(items.some(i=>i.text.toLowerCase()===t.toLowerCase())){toast('Gibt es schon in der Liste');return}e.value='';send({t:'add',text:t});e.focus()}
+$app.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='ai')addItem();if(e.target.id==='cd')act('join',e.target);if(e.target.id==='db')act('savedb',e.target)}});
+$app.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;if(t.classList.contains('sheet')&&e.target!==t)return;act(t.dataset.a,t)});
+function act(a,t){const d=t.dataset||{};
+ if(a==='create'){if(setName())startLobby(newCode())}
+ else if(a==='reopen'){if(setName())startLobby(d.c)}
+ else if(a==='join'){if(!setName())return;const c=(document.getElementById('cd').value||'').trim().toLowerCase().replace(/[^a-z0-9]/g,'');if(!c){toast('Bitte den Code eingeben');return}startLobby(c)}
+ else if(a==='leave'){leave()}
+ else if(a==='copy'){const u=location.href.split('#')[0]+'#c='+code+'&db='+encodeURIComponent(cfg.db);(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast('Link kopiert'),()=>prompt('Einladungslink:',u))}
+ else if(a==='savedb'){const v=(document.getElementById('db').value||'').trim().replace(/\/+$/,'');if(!okDb(v)){toast('Das sieht nicht nach einer Firebase-Adresse aus');return}cfg.db=v;LS.set('bb-db',v);render()}
+ else if(a==='resetdb'){cfg.db='';LS.set('bb-db','');render()}
+ else if(a==='tab'){tab=d.t;render()}
+ else if(a==='add')addItem();
+ else if(a==='del')send({t:'del',id:d.i});
+ else if(a==='size'){card=newCard(+d.s);saveCard()}
+ else if(a==='mode'){mode=mode==='build'?'play':'build';render()}
+ else if(a==='clear'){card=newCard(card.size);saveCard()}
+ else if(a==='fill')fill();
+ else if(a==='cell'){const i=+d.i;if(mode==='play')toggle(i);else if(card.cells[i]){card.cells[i]=null;card.marked[i]=false;card.lines=lines(card).length;saveCard()}else{picking=i;render()}}
+ else if(a==='pick'){const it=items.find(x=>x.id===d.i);if(it){card.cells[picking]={i:it.id,t:it.text};card.marked[picking]=false}picking=null;saveCard()}
+ else if(a==='closeSheet'){picking=null;render()}}
+render();
+</script>
+</body>
+</html>
