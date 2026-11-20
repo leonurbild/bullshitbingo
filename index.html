@@ -10,7 +10,7 @@
 :root{--blue:#2344d6;--ink:#101a4d;--paper:#fffdf7;--line:#d9d4c4;--pink:#ff3d81;--sun:#ffd23f;--mint:#17b890;
 --f:"Bricolage Grotesque","Arial Rounded MT Bold",system-ui,sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%}
+html,body{margin:0;min-height:100%;overflow-x:hidden}
 body{font-family:var(--f);color:var(--ink);background:var(--blue);
 background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.14) 1.5px,transparent 0);background-size:22px 22px;
 padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
@@ -33,13 +33,15 @@ button.on{background:var(--ink);color:#fff}
 .row{display:flex;gap:8px;align-items:center}.w{flex:1}.sp{justify-content:space-between}.mt{margin-top:12px}
 .muted{color:#6b6a63;font-size:14px}
 .top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.top button,.chip,.top .muted{white-space:nowrap}.top button{padding:8px 12px}
 .chip{background:#fff;border:2px solid var(--ink);border-radius:999px;padding:6px 12px;font-weight:700;display:flex;gap:6px;align-items:center;cursor:pointer}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--mint)}.dot.bad{background:var(--pink)}
 .tabs{display:flex;background:rgba(10,20,80,.35);border-radius:14px;padding:4px;margin-bottom:12px}
 .tabs button{flex:1;border:0;box-shadow:none;background:transparent;color:#fff;padding:9px}
 .tabs button.on{background:var(--paper);color:var(--ink)}
 .grid{display:grid;gap:0;border:2px solid var(--ink);border-radius:12px;overflow:hidden;background:#fff}
-.cell{aspect-ratio:1;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center;padding:5px;font-weight:600;font-size:clamp(10px,3.1vw,15px);line-height:1.15;word-break:break-word;hyphens:auto;position:relative;cursor:pointer;user-select:none}
+.cell{aspect-ratio:1;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center;padding:3px;font-weight:600;font-size:var(--fs,13px);line-height:1.12;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto;overflow:hidden;min-width:0;position:relative;cursor:pointer;user-select:none}
+.cell.l{font-size:calc(var(--fs,13px)*.86)}.cell.xl{font-size:calc(var(--fs,13px)*.74)}
 .cell.e{color:#b3ae9b;font-size:26px;font-weight:500;background:repeating-linear-gradient(45deg,#fffdf7,#fffdf7 6px,#f6f2e3 6px,#f6f2e3 12px)}
 .cell span{position:relative;z-index:1}
 .cell.m::before{content:"";position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff7aa8,var(--pink) 60%);opacity:.85;animation:dab .28s cubic-bezier(.3,1.6,.5,1)}
@@ -58,6 +60,7 @@ button.on{background:var(--ink);color:#fff}
 @keyframes pop{0%{transform:scale(.1) rotate(-14deg);opacity:0}20%{transform:scale(1.15) rotate(5deg);opacity:1}35%{transform:scale(1) rotate(-3deg)}80%{opacity:1}100%{opacity:0;transform:scale(1.05)}}
 .cf{position:fixed;top:-20px;width:10px;height:15px;z-index:19;pointer-events:none;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(112vh) rotate(800deg)}}
+@media (max-width:480px){#app{padding:12px 8px 40px}.ticket{padding:12px}}
 @media (prefers-reduced-motion:reduce){.cell.m::before,.toast,.big,.cf{animation:none}.cf{display:none}}
 </style>
 </head>
@@ -137,7 +140,7 @@ function view(){
   return h+'</div>'}
  const win=new Set(lines(card).flat());
  h+=`<div class="ticket"><div class="row sp mt" style="margin:0 0 12px"><div class="row">${mode==='build'?[3,4,5].map(s=>`<button class="${s===card.size?'on':''}" data-a="size" data-s="${s}">${s}×${s}</button>`).join(''):`<b>${lines(card).length} Reihe${lines(card).length===1?'':'n'} voll</b>`}</div><button class="p" data-a="mode">${mode==='build'?'Spielen':'Bearbeiten'}</button></div>`;
- h+=`<div class="grid" style="grid-template-columns:repeat(${card.size},1fr)">${card.cells.map((x,i)=>`<div class="cell${x?'':' e'}${x&&card.marked[i]?' m':''}${win.has(i)?' win':''}" data-a="cell" data-i="${i}"><span>${x?esc(x.t):(mode==='build'?'+':'')}</span></div>`).join('')}</div>`;
+ h+=`<div class="grid" style="grid-template-columns:repeat(${card.size},minmax(0,1fr));--fs:${{3:'clamp(12px,4vw,18px)',4:'clamp(10px,3.3vw,15px)',5:'clamp(8px,2.5vw,12px)'}[card.size]}">${card.cells.map((x,i)=>`<div class="cell${x?'':' e'}${x&&card.marked[i]?' m':''}${win.has(i)?' win':''}${x&&x.t.length>50?' xl':x&&x.t.length>28?' l':''}" data-a="cell" data-i="${i}"><span>${x?esc(x.t):(mode==='build'?'+':'')}</span></div>`).join('')}</div>`;
  h+=mode==='build'?`<p class="muted">Tippe auf ein leeres Feld, um einen Vorschlag zu wählen. Ein belegtes Feld leerst du per Tippen.</p><div class="row"><button data-a="fill">Zufällig füllen</button><button data-a="clear">Leeren</button></div>`:`<p class="muted">Tippe ein Feld an, sobald es passiert. Eine volle Reihe, Spalte oder Diagonale ist ein Bingo.</p>`;
  h+='</div>';if(picking!==null)h+=sheetOf();return h}
 function render(){const a=document.activeElement,keep=a&&a.id&&a.tagName==='INPUT'?{id:a.id,v:a.value,s:a.selectionStart}:null;
